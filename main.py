@@ -40,6 +40,12 @@ GPIO.setup(seg2G, GPIO.OUT)
 GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # red button
 GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # blue button
 
+LEDblue=19
+LEDred=26
+LEDgreen=16
+GPIO.setup(LEDblue,GPIO.OUT)
+GPIO.setup(LEDred,GPIO.OUT)
+GPIO.setup(LEDgreen,GPIO.OUT)
 
 class MyGui:
     def __init__(self):
@@ -69,7 +75,10 @@ class MyGui:
         self.entry2.place(x=280, y=100)
 
         self.submitButton = Button(self.frame, text="Submit", command=self.submit)
-        self.submitButton.place(x=350, y=100)
+        self.submitButton.place(x=50, y=200)
+
+        self.quitButton = Button(self.frame, text="Quit", command=self.myWindow.destroy)
+        self.quitButton.place(x=150, y=200)
 
     def writeTens(self, number):
         if number == 0:
@@ -265,21 +274,36 @@ class MyGui:
         if (self.myWindow.focus_get() == self.entry1):
             self.actualTemp.set(self.actualTemp.get() + 1)
             self.writeToSevenSegmentDisplay(self.actualTemp.get())
+            self.turnActualLED()
+
         elif (self.myWindow.focus_get() == self.entry2):
             self.targetTemp.set(self.targetTemp.get() + 1)
             self.writeToSevenSegmentDisplay(self.targetTemp.get())
+            self.turnTargetLED()
 
     def decreaseTemp(self, channel):
         print("called decreaseemp, channel=", channel)
         if (self.myWindow.focus_get() == self.entry1):
             self.actualTemp.set(self.actualTemp.get() - 1)
             self.writeToSevenSegmentDisplay(self.actualTemp.get())
+            self.turnActualLED()
         elif (self.myWindow.focus_get() == self.entry2):
             self.targetTemp.set(self.targetTemp.get() - 1)
             self.writeToSevenSegmentDisplay(self.targetTemp.get())
+            self.turnTargetLED()
+    def turnActualLED(self):
+
+        GPIO.output(LEDred,False)	#RED
+        GPIO.output(LEDgreen,False)	#GREEN
+        GPIO.output(LEDblue,True)	#BLUE
+
+    def turnTargetLED(self):
+        GPIO.output(LEDred,False)	#RED
+        GPIO.output(LEDgreen,True)	#GREEN
+        GPIO.output(LEDblue,False)	#BLUE
 
     def submit(self):
-        pass
+        showinfo("Temperature reading", "Actual temperature is: " + str(self.actualTemp.get()) + '\n' + "Target temperature is: " + str(self.targetTemp.get()) )
 
 
 if __name__ == "__main__":
@@ -287,5 +311,6 @@ if __name__ == "__main__":
     GPIO.add_event_detect(5, GPIO.FALLING, callback=my_gui.increaseTemp, bouncetime=200)
     GPIO.add_event_detect(12, GPIO.FALLING, callback=my_gui.decreaseTemp, bouncetime=200)
     mainloop()
+
 
 
